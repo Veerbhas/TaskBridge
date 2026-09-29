@@ -1,0 +1,61 @@
+@baseUrl = https://localhost:5001
+@token = {{$dotenv TASKBRIDGE_ACCESS_TOKEN}}
+@teamId = 00000000-0000-0000-0000-000000000001
+@projectId = 00000000-0000-0000-0000-000000000002
+@userId = {{$dotenv TASKBRIDGE_USER_ID}}
+@notificationId = 00000000-0000-0000-0000-000000000003
+
+### Create a project (requires ProjectWriter)
+POST {{baseUrl}}/projects/
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Platform migration",
+  "teamId": "{{teamId}}"
+}
+
+### Get a project (requires ProjectReader)
+GET {{baseUrl}}/projects/{{projectId}}
+Authorization: Bearer {{token}}
+
+### Get projects for a team (requires ProjectReader)
+GET {{baseUrl}}/projects/team/{{teamId}}
+Authorization: Bearer {{token}}
+
+### Update project status (requires ProjectWriter)
+PATCH {{baseUrl}}/projects/{{projectId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "OnHold"
+}
+
+### Delete a project (requires ProjectWriter)
+DELETE {{baseUrl}}/projects/{{projectId}}
+Authorization: Bearer {{token}}
+
+### Read project audit history (requires AuditReader; upper date bound is exclusive)
+GET {{baseUrl}}/audit/{{projectId}}?from=2026-01-01T00:00:00Z&to=2027-01-01T00:00:00Z&eventType=PROJECT_UPDATED
+Authorization: Bearer {{token}}
+
+### Record an internal audit event (trusted service identity with AuditWriter only)
+POST {{baseUrl}}/audit
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "projectId": "{{projectId}}",
+  "eventType": "MILESTONE_REOPENED",
+  "previousState": "{\"status\":\"Closed\"}",
+  "newState": "{\"status\":\"Open\"}"
+}
+
+### Get unread notifications for the JWT subject (requires NotificationReader)
+GET {{baseUrl}}/notifications/{{userId}}
+Authorization: Bearer {{token}}
+
+### Mark a notification as read (requires NotificationReader)
+PATCH {{baseUrl}}/notifications/{{notificationId}}/read
+Authorization: Bearer {{token}}
